@@ -1,13 +1,10 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
-// Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Get Gemini model - using gemini-3-flash-preview (latest and fastest!)
 const model = genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
 
-// System prompts for different operations
 const prompts = {
   nlToRFP: `You are an expert procurement assistant. Convert the user's natural language description into a structured RFP format.
 

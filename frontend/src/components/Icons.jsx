@@ -1,4 +1,4 @@
-// SVG Icon Components to replace Material-UI icons
+
 import React from 'react';
 
 const iconDefaultProps = {

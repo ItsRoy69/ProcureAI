@@ -1,9 +1,7 @@
 const { Proposal, RFP, Vendor } = require('../models');
 const { compareProposals } = require('../services/aiService');
 
-/**
- * Get all proposals for a specific RFP
- */
+
 async function getProposalsByRFP(req, res) {
   try {
     const { rfpId } = req.params;
@@ -30,9 +28,7 @@ async function getProposalsByRFP(req, res) {
   }
 }
 
-/**
- * Get single proposal by ID
- */
+
 async function getProposalById(req, res) {
   try {
     const { id } = req.params;
@@ -64,9 +60,7 @@ async function getProposalById(req, res) {
   }
 }
 
-/**
- * Compare multiple proposals using AI
- */
+
 async function compareProposalsHandler(req, res) {
   try {
     const { rfpId, proposalIds } = req.body;
@@ -78,7 +72,6 @@ async function compareProposalsHandler(req, res) {
       });
     }
 
-    // Get RFP
     const rfp = await RFP.findByPk(rfpId);
     if (!rfp) {
       return res.status(404).json({
@@ -87,7 +80,6 @@ async function compareProposalsHandler(req, res) {
       });
     }
 
-    // Get proposals
     const proposals = await Proposal.findAll({
       where: {
         id: proposalIds,
@@ -186,9 +178,7 @@ async function compareProposalsHandler(req, res) {
   }
 }
 
-/**
- * Update proposal status
- */
+
 async function updateProposalStatus(req, res) {
   try {
     const { id } = req.params;
@@ -212,7 +202,6 @@ async function updateProposalStatus(req, res) {
 
     await proposal.update({ status });
 
-    // Send email notification if accepted or rejected
     let emailSent = false;
     if (status === 'accepted' || status === 'rejected') {
       const { sendProposalStatusEmail } = require('../services/emailService');

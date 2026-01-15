@@ -12,7 +12,6 @@ const register = async (req, res) => {
       });
     }
 
-    // Check if user exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({
@@ -21,15 +20,13 @@ const register = async (req, res) => {
       });
     }
 
-    // Create user
     const user = await User.create({
       name,
       email,
       password,
-      role: 'user' // Default role
+      role: 'user'
     });
 
-    // Generate token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET || 'your_jwt_secret_key_change_in_production',
@@ -61,7 +58,6 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check for Env Admin first (for backward compatibility/recovery)
     if (email === process.env.EMAIL_USER && password === (process.env.ADMIN_PASSWORD || process.env.EMAIL_PASSWORD)) {
       const token = jwt.sign(
         { email: process.env.EMAIL_USER, role: 'admin' },
@@ -77,7 +73,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Check Database Users
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json({

@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const vendorController = require('../controllers/vendorController');
 
-// CRUD operations
 router.post('/', vendorController.createVendor);
 router.get('/', vendorController.getAllVendors);
 router.get('/:id', vendorController.getVendorById);

@@ -9,7 +9,7 @@ const modernTheme = createTheme({
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#8B5CF6', // Purple
+      main: '#8B5CF6',
       light: '#A78BFA',
       dark: '#7C3AED',
       contrastText: '#FFFFFF',

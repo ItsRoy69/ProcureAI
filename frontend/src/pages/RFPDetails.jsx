@@ -46,7 +46,7 @@ function RFPDetails() {
       const result = await rfpAPI.send(id, selectedVendors);
       if (result.success) {
         setShowVendorSelector(false);
-        loadRFP(); // Reload to get updated status
+        loadRFP();
         alert('RFP sent successfully!');
       }
     } catch (err) {

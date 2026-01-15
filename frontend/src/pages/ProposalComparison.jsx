@@ -36,8 +36,7 @@ function ProposalComparison() {
   const [loading, setLoading] = useState(true);
   const [comparing, setComparing] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Email preview dialog state
+
   const [emailPreviewOpen, setEmailPreviewOpen] = useState(false);
   const [emailPreview, setEmailPreview] = useState({ subject: '', body: '' });
   const [editableEmailBody, setEditableEmailBody] = useState('');
@@ -97,7 +96,7 @@ function ProposalComparison() {
 
   const handleStatusUpdate = async (proposalId, newStatus) => {
     try {
-      // Generate email preview first
+
       setSendingEmail(true);
       const response = await fetch(`http://localhost:5000/api/proposals/${proposalId}/preview-email`, {
         method: 'POST',
@@ -109,13 +108,13 @@ function ProposalComparison() {
       setSendingEmail(false);
       
       if (result.success) {
-        // Show preview dialog
+
         setEmailPreview({ subject: result.data.subject, body: result.data.body });
         setEditableEmailBody(result.data.body);
         setPendingStatusUpdate({ proposalId, status: newStatus });
         setEmailPreviewOpen(true);
       } else {
-        // Check if quota exceeded
+
         if (result.quotaExceeded || response.status === 429) {
           alert('⚠️ AI Quota Exceeded\n\nYou have reached the daily limit for AI-generated emails (20 requests/day).\n\nOptions:\n1. Wait 24 hours for quota reset\n2. Manually compose and send email to vendor\n3. Update status without sending email\n\nThe proposal status has NOT been changed yet.');
         } else {
@@ -218,7 +217,6 @@ function ProposalComparison() {
             </Typography>
           </Box>
 
-          {/* Proposals Table */}
           <TableContainer component={Paper} sx={{ mb: 4 }}>
             <Table>
               <TableHead>
@@ -293,15 +291,12 @@ function ProposalComparison() {
               </TableBody>
             </Table>
           </TableContainer>
-
-          {/* AI Comparison Results */}
           {comparison && (
             <>
               <Typography variant="h5" gutterBottom>
                 AI Analysis
               </Typography>
 
-              {/* Recommendation */}
               {comparison.recommendation && (
                 <Alert severity="info" sx={{ mb: 3 }}>
                   <Typography variant="subtitle1" gutterBottom>
@@ -313,7 +308,6 @@ function ProposalComparison() {
                 </Alert>
               )}
 
-              {/* Summary */}
               {comparison.summary && (
                 <Paper sx={{ p: 2, mb: 3 }}>
                   <Typography variant="subtitle2" gutterBottom>
@@ -323,7 +317,6 @@ function ProposalComparison() {
                 </Paper>
               )}
 
-              {/* Detailed Comparison */}
               <Grid container spacing={3}>
                 {comparison.comparison?.map((item) => {
                   const vendor = proposals.find(p => p.vendorId === item.vendorId)?.vendor;
@@ -422,7 +415,6 @@ function ProposalComparison() {
         </>
       )}
 
-      {/* Email Preview Dialog */}
       <Dialog open={emailPreviewOpen} onClose={handleCancelSend} maxWidth="md" fullWidth>
         <DialogTitle>
           {pendingStatusUpdate.status === 'accepted' ? '✓ Acceptance' : '✗ Rejection'} Email Preview

@@ -1,10 +1,6 @@
 const { model, prompts } = require('../config/ai');
 
-/**
- * Convert natural language input to structured RFP
- * @param {string} userInput - Natural language description of RFP
- * @returns {Promise<Object>} Structured RFP data
- */
+
 async function convertNLToRFP(userInput) {
   try {
     const prompt = `${prompts.nlToRFP}\n\nUser Input:\n${userInput}`;
@@ -12,8 +8,7 @@ async function convertNLToRFP(userInput) {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
-    // Extract JSON from response (remove markdown code blocks if present)
+
     let jsonText = text.trim();
     if (jsonText.startsWith('```json')) {
       jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
@@ -45,26 +40,19 @@ async function convertNLToRFP(userInput) {
   }
 }
 
-/**
- * Parse vendor email response to extract proposal data
- * @param {string} emailContent - Raw email content
- * @param {Array} attachments - Email attachments (optional)
- * @returns {Promise<Object>} Parsed proposal data
- */
+
 async function parseVendorResponse(emailContent, attachments = []) {
   try {
     let fullContent = emailContent;
-    
-    // If there are PDF attachments, we could extract text from them
-    // For now, we'll just use the email content
+
+
     
     const prompt = `${prompts.parseEmail}\n\nEmail Content:\n${fullContent}`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
-    // Extract JSON from response
+
     let jsonText = text.trim();
     if (jsonText.startsWith('```json')) {
       jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
@@ -96,12 +84,7 @@ async function parseVendorResponse(emailContent, attachments = []) {
   }
 }
 
-/**
- * Compare multiple proposals against RFP requirements
- * @param {Object} rfp - Original RFP data
- * @param {Array} proposals - Array of proposal objects with vendor info
- * @returns {Promise<Object>} Comparison analysis
- */
+
 async function compareProposals(rfp, proposals) {
   try {
     const rfpSummary = {
@@ -129,13 +112,18 @@ async function compareProposals(rfp, proposals) {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-    
-    // Extract JSON from response
+
     let jsonText = text.trim();
     if (jsonText.startsWith('```json')) {
       jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
     } else if (jsonText.startsWith('```')) {
       jsonText = jsonText.replace(/```\n?/g, '');
+    }
+    
+    console.log('AI Response for proposal comparison:', jsonText.substring(0, 200));
+
+    if (!jsonText || jsonText.trim() === '') {
+      throw new Error('AI returned empty response');
     }
     
     const comparisonData = JSON.parse(jsonText);
@@ -171,9 +159,7 @@ async function compareProposals(rfp, proposals) {
   }
 }
 
-/**
- * Generate personalized email for proposal acceptance/rejection
- */
+
 async function generateStatusEmail(proposal, rfp, vendor, status) {
   try {
     const prompt = `Generate a professional email to notify a vendor about their proposal status.
@@ -212,8 +198,7 @@ Return ONLY the email body text, no subject line, no JSON.`;
     };
   } catch (error) {
     console.error('Error generating status email:', error);
-    
-    // Check if it's a quota error
+
     let errorMessage = error.message;
     if (error.message && (error.message.includes('quota') || error.message.includes('429'))) {
       errorMessage = 'AI quota exceeded. Daily limit reached (20 requests/day). Please try again tomorrow or compose email manually.';

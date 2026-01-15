@@ -1,4 +1,4 @@
-// Modal/Dialog Component
+
 import React, { useEffect } from 'react';
 import { CloseIcon } from './Icons';
 
@@ -44,12 +44,10 @@ export const Modal = ({ isOpen, onClose, title, children, footer, size = 'md' })
   );
 };
 
-// Spinner Component
 export const Spinner = ({ size = 'md' }) => (
   <div className={`spinner ${size === 'lg' ? 'spinner-lg' : ''}`}></div>
 );
 
-// Alert Component
 export const Alert = ({ type = 'info', children, onClose }) => (
   <div className={`alert alert-${type}`}>
     <div style={{ flex: 1 }}>{children}</div>

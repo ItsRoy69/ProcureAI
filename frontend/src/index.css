@@ -1,4 +1,4 @@
-/* CSS Reset & Base Styles */
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -69,7 +69,7 @@ input, textarea, select {
   font-family: inherit;
 }
 
-/* Scrollbar Styling */
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

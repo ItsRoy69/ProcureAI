@@ -2,9 +2,7 @@ const { RFP, Vendor, Proposal } = require('../models');
 const { convertNLToRFP } = require('../services/aiService');
 const { sendRFPToVendors } = require('../services/emailService');
 
-/**
- * Create RFP from natural language
- */
+
 async function createFromNL(req, res) {
   try {
     const { userInput } = req.body;
@@ -16,7 +14,6 @@ async function createFromNL(req, res) {
       });
     }
 
-    // Convert natural language to structured RFP
     const aiResult = await convertNLToRFP(userInput);
 
     if (!aiResult.success) {
@@ -27,7 +24,6 @@ async function createFromNL(req, res) {
       });
     }
 
-    // Create RFP in database
     const rfp = await RFP.create({
       ...aiResult.data,
       status: 'draft'
@@ -46,9 +42,7 @@ async function createFromNL(req, res) {
   }
 }
 
-/**
- * Get all RFPs
- */
+
 async function getAllRFPs(req, res) {
   try {
     const { status } = req.query;
@@ -83,9 +77,7 @@ async function getAllRFPs(req, res) {
   }
 }
 
-/**
- * Get single RFP by ID
- */
+
 async function getRFPById(req, res) {
   try {
     const { id } = req.params;
@@ -120,9 +112,7 @@ async function getRFPById(req, res) {
   }
 }
 
-/**
- * Update RFP
- */
+
 async function updateRFP(req, res) {
   try {
     const { id } = req.params;
@@ -152,9 +142,7 @@ async function updateRFP(req, res) {
   }
 }
 
-/**
- * Delete RFP
- */
+
 async function deleteRFP(req, res) {
   try {
     const { id } = req.params;
@@ -183,9 +171,7 @@ async function deleteRFP(req, res) {
   }
 }
 
-/**
- * Send RFP to selected vendors
- */
+
 async function sendRFP(req, res) {
   try {
     const { id } = req.params;
@@ -219,9 +205,7 @@ async function sendRFP(req, res) {
   }
 }
 
-/**
- * Get proposals for an RFP
- */
+
 async function getProposals(req, res) {
   try {
     const { id } = req.params;

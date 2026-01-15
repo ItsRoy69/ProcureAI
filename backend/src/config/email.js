@@ -3,7 +3,6 @@ const Imap = require('imap');
 const { simpleParser } = require('mailparser');
 require('dotenv').config();
 
-// Create email transporter for sending emails
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE || 'gmail',
   auth: {
@@ -12,7 +11,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Verify email configuration
 const verifyEmailConfig = async () => {
   try {
     await transporter.verify();
@@ -24,7 +22,6 @@ const verifyEmailConfig = async () => {
   }
 };
 
-// IMAP configuration for receiving emails
 const getImapConfig = () => {
   return {
     user: process.env.IMAP_USER,
@@ -36,7 +33,6 @@ const getImapConfig = () => {
   };
 };
 
-// Email template for RFP
 const createRFPEmailTemplate = (rfp, referenceId) => {
   const requirementsList = rfp.requirements
     .map((req, index) => `${index + 1}. ${req.item} - ${req.specification} (Quantity: ${req.quantity})`)

@@ -1,8 +1,6 @@
 const { Vendor, RFP, Proposal } = require('../models');
 
-/**
- * Create new vendor
- */
+
 async function createVendor(req, res) {
   try {
     const { name, email, contactPerson, phone, companyInfo } = req.body;
@@ -14,7 +12,6 @@ async function createVendor(req, res) {
       });
     }
 
-    // Check if vendor with this email already exists
     const existingVendor = await Vendor.findOne({ where: { email } });
     if (existingVendor) {
       return res.status(409).json({
@@ -44,9 +41,7 @@ async function createVendor(req, res) {
   }
 }
 
-/**
- * Get all vendors
- */
+
 async function getAllVendors(req, res) {
   try {
     const vendors = await Vendor.findAll({
@@ -66,9 +61,7 @@ async function getAllVendors(req, res) {
   }
 }
 
-/**
- * Get single vendor by ID
- */
+
 async function getVendorById(req, res) {
   try {
     const { id } = req.params;
@@ -107,9 +100,7 @@ async function getVendorById(req, res) {
   }
 }
 
-/**
- * Update vendor
- */
+
 async function updateVendor(req, res) {
   try {
     const { id } = req.params;
@@ -124,7 +115,6 @@ async function updateVendor(req, res) {
       });
     }
 
-    // If email is being updated, check for duplicates
     if (updateData.email && updateData.email !== vendor.email) {
       const existingVendor = await Vendor.findOne({ where: { email: updateData.email } });
       if (existingVendor) {
@@ -150,9 +140,7 @@ async function updateVendor(req, res) {
   }
 }
 
-/**
- * Delete vendor
- */
+
 async function deleteVendor(req, res) {
   try {
     const { id } = req.params;

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AddIcon, EmailIcon, PhoneIcon, BusinessIcon, MoreVertIcon, CheckCircleIcon } from '../components/Icons';
 import { Modal, Alert } from '../components/UIComponents';
 import { vendorAPI } from '../services/api';
 
 function Vendors() {
-  const navigate = useNavigate();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);

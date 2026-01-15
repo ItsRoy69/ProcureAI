@@ -35,7 +35,6 @@ function AppContent() {
       <Routes>
         <Route path="/login" element={<Login />} />
         
-        {/* Protected Routes */}
         <Route path="*" element={
           <PrivateRoute>
             <div className="app-layout">

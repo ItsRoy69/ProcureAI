@@ -166,7 +166,6 @@ function VendorSelector({ selectedVendors, onSelectionChange, onSendRFP, sending
         </Button>
       </Box>
 
-      {/* Add Vendor Dialog */}
       <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Add New Vendor</DialogTitle>
         <DialogContent>

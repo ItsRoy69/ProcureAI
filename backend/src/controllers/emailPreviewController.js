@@ -1,9 +1,7 @@
 const { Proposal, RFP, Vendor } = require('../models');
 const { generateStatusEmail } = require('../services/aiService');
 
-/**
- * Preview email before sending (for user review/edit)
- */
+
 async function previewStatusEmail(req, res) {
   try {
     const { id } = req.params;
@@ -16,7 +14,6 @@ async function previewStatusEmail(req, res) {
       });
     }
 
-    // Get full proposal with RFP and Vendor details
     const proposal = await Proposal.findByPk(id, {
       include: [
         { model: RFP, as: 'rfp' },
@@ -38,7 +35,6 @@ async function previewStatusEmail(req, res) {
       });
     }
 
-    // Generate AI email
     const emailResult = await generateStatusEmail(
       proposal,
       proposal.rfp,
@@ -47,7 +43,7 @@ async function previewStatusEmail(req, res) {
     );
 
     if (!emailResult.success) {
-      // Check if it's a quota error
+
       if (emailResult.error && emailResult.error.includes('quota')) {
         return res.status(429).json({
           success: false,
@@ -63,7 +59,6 @@ async function previewStatusEmail(req, res) {
       });
     }
 
-    // Return preview without sending
     const subject = status === 'accepted'
       ? `✓ Proposal Accepted - ${proposal.rfp.title}`
       : `Proposal Update - ${proposal.rfp.title}`;

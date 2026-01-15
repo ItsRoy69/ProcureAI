@@ -1,7 +1,6 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Initialize SQLite database
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: process.env.DB_STORAGE || './database.sqlite',
@@ -14,7 +13,6 @@ const sequelize = new Sequelize({
   }
 });
 
-// Test database connection
 const testConnection = async () => {
   try {
     await sequelize.authenticate();

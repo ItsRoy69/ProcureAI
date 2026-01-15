@@ -33,13 +33,11 @@ function Sidebar({ mobileOpen, onDrawerToggle }) {
 
   const drawerContent = (
     <div className="sidebar-content">
-      {/* Header */}
       <div className="sidebar-header">
         <div className="sidebar-logo">P</div>
         <h2 className="sidebar-title">ProcureAI</h2>
       </div>
 
-      {/* Navigation */}
       <nav className="sidebar-nav">
         <p className="sidebar-nav-label">MENU</p>
         <ul>
@@ -65,7 +63,6 @@ function Sidebar({ mobileOpen, onDrawerToggle }) {
         </ul>
       </nav>
       
-      {/* User Actions */}
       <div className="sidebar-footer">
         <div className="sidebar-user" onClick={() => setMenuOpen(!menuOpen)}>
           <div className="flex items-center gap-3">
@@ -97,7 +94,6 @@ function Sidebar({ mobileOpen, onDrawerToggle }) {
 
   return (
     <aside className="sidebar-wrapper">
-      {/* Mobile Drawer */}
       {mobileOpen && (
         <>
           <div className="sidebar-backdrop" onClick={onDrawerToggle}></div>
@@ -107,7 +103,6 @@ function Sidebar({ mobileOpen, onDrawerToggle }) {
         </>
       )}
       
-      {/* Desktop Sidebar */}
       <div className="sidebar sidebar-desktop">
         {drawerContent}
       </div>

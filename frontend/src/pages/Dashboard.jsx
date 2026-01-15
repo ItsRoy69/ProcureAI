@@ -16,7 +16,6 @@ import './Dashboard.css';
 function Dashboard() {
   const navigate = useNavigate();
   const [rfps, setRfps] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [filters, setFilters] = useState({
     status: 'all',
@@ -37,24 +36,18 @@ function Dashboard() {
       }
     } catch (error) {
       console.error('Error loading RFPs:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Apply filters to RFPs (must be before stats calculation)
   const filteredRfps = rfps.filter(rfp => {
-    // Status filter
     if (filters.status !== 'all' && rfp.status !== filters.status) {
       return false;
     }
 
-    // Search term filter
     if (filters.searchTerm && !rfp.title.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
       return false;
     }
 
-    // Date range filter
     if (filters.dateFrom) {
       const rfpDate = new Date(rfp.createdAt);
       const fromDate = new Date(filters.dateFrom);
@@ -93,7 +86,7 @@ function Dashboard() {
 
   const handleApplyFilters = () => {
     setShowFilterModal(false);
-    // Filters are applied automatically via filteredRfps
+
   };
 
   const handleClearFilters = () => {
@@ -106,14 +99,14 @@ function Dashboard() {
   };
 
   const handleExport = () => {
-    // Create CSV content
+
     const headers = ['ID', 'Title', 'Status', 'Budget', 'Created Date', 'Deadline'];
     const csvRows = [headers.join(',')];
 
     filteredRfps.forEach(rfp => {
       const row = [
         rfp.id,
-        `"${rfp.title}"`, // Wrap in quotes to handle commas
+        `"${rfp.title}"`,
         rfp.status,
         rfp.budget || 'N/A',
         new Date(rfp.createdAt).toLocaleDateString(),
@@ -123,8 +116,7 @@ function Dashboard() {
     });
 
     const csvContent = csvRows.join('\n');
-    
-    // Create download link
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -160,7 +152,6 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
-      {/* Header */}
       <div className="dashboard-header">
         <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
         <div className="flex gap-2">
@@ -181,7 +172,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="stats-grid">
         <StatCard
           title="Total RFPs"
@@ -209,9 +199,7 @@ function Dashboard() {
         />
       </div>
 
-      {/* Main Content */}
       <div className="dashboard-content">
-        {/* Recent Activity Table */}
         <div className="dashboard-main">
           <div className="card">
             <div className="card-header flex justify-between items-center">
@@ -272,7 +260,6 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Side Panel */}
         <div className="dashboard-sidebar">
           <div className="card">
             <div className="card-body card-body-sm">
@@ -300,7 +287,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Filter Modal */}
       <Modal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}

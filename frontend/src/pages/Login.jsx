@@ -54,7 +54,6 @@ function Login() {
 
   return (
     <div className="login-container">
-      {/* Left Side - Brand */}
       {!isMobile && (
         <div className="login-brand">
           <div className="login-brand-bg-1"></div>
@@ -70,7 +69,6 @@ function Login() {
         </div>
       )}
 
-      {/* Right Side - Form */}
       <div className="login-form-container">
         <div className="login-form-wrapper">
           {isMobile && (

@@ -2,12 +2,7 @@ const { transporter, getImapConfig, createRFPEmailTemplate, Imap, simpleParser }
 const { RFP, Vendor, Proposal, RFPVendor } = require('../models');
 const { parseVendorResponse } = require('./aiService');
 
-/**
- * Send RFP to selected vendors via email
- * @param {Object} rfp - RFP object
- * @param {Array} vendorIds - Array of vendor IDs
- * @returns {Promise<Object>} Send results
- */
+
 async function sendRFPToVendors(rfp, vendorIds) {
   const results = {
     success: [],
@@ -15,7 +10,7 @@ async function sendRFPToVendors(rfp, vendorIds) {
   };
 
   try {
-    // Get vendor details
+
     const vendors = await Vendor.findAll({
       where: {
         id: vendorIds
@@ -26,13 +21,10 @@ async function sendRFPToVendors(rfp, vendorIds) {
       throw new Error('No vendors found with provided IDs');
     }
 
-    // Generate unique reference ID for this RFP
     const referenceId = `RFP-${rfp.id}-${Date.now()}`;
 
-    // Create email template
     const emailTemplate = createRFPEmailTemplate(rfp, referenceId);
 
-    // Send email to each vendor
     for (const vendor of vendors) {
       try {
         await transporter.sendMail({
@@ -42,7 +34,6 @@ async function sendRFPToVendors(rfp, vendorIds) {
           html: emailTemplate.html
         });
 
-        // Create or update RFPVendor record using findOrCreate (SQLite compatible)
         const [rfpVendor, created] = await RFPVendor.findOrCreate({
           where: {
             rfpId: rfp.id,
@@ -54,7 +45,6 @@ async function sendRFPToVendors(rfp, vendorIds) {
           }
         });
 
-        // If it already exists, update it
         if (!created) {
           await rfpVendor.update({
             sentAt: new Date(),
@@ -95,7 +85,6 @@ async function sendRFPToVendors(rfp, vendorIds) {
       }
     }
 
-    // Update RFP status to 'sent' if at least one email was sent successfully
     if (results.success.length > 0) {
       await rfp.update({ status: 'sent' });
     }
@@ -115,15 +104,11 @@ async function sendRFPToVendors(rfp, vendorIds) {
   }
 }
 
-/**
- * Monitor inbox for vendor responses
- * This function checks the inbox for new emails and processes them
- */
+
 async function monitorInbox() {
   return new Promise((resolve, reject) => {
     const imapConfig = getImapConfig();
-    
-    // Check if credentials are actually set (not just placeholder values)
+
     if (!imapConfig.user || !imapConfig.password || 
         imapConfig.user === '' || imapConfig.password === '' ||
         imapConfig.user === 'your_email@gmail.com' || 
@@ -143,7 +128,6 @@ async function monitorInbox() {
           return reject(err);
         }
 
-        // Search for unread emails
         imap.search(['UNSEEN'], async (err, results) => {
           if (err) {
             console.error('Error searching emails:', err);
@@ -165,8 +149,7 @@ async function monitorInbox() {
             msg.on('body', async (stream, info) => {
               try {
                 const parsed = await simpleParser(stream);
-                
-                // Extract reference ID from subject
+
                 const subject = parsed.subject || '';
                 const refMatch = subject.match(/RFP-(\d+)-\d+/);
                 
@@ -176,29 +159,25 @@ async function monitorInbox() {
                 }
 
                 const rfpId = parseInt(refMatch[1]);
-                
-                // Find the RFP
+
                 const rfp = await RFP.findByPk(rfpId);
                 if (!rfp) {
                   console.log(`RFP with ID ${rfpId} not found. Skipping email.`);
                   return;
                 }
 
-                // Extract sender email
                 const senderEmail = parsed.from?.value?.[0]?.address;
                 if (!senderEmail) {
                   console.log('Could not extract sender email. Skipping.');
                   return;
                 }
 
-                // Find vendor by email
                 const vendor = await Vendor.findOne({ where: { email: senderEmail } });
                 if (!vendor) {
                   console.log(`Vendor with email ${senderEmail} not found. Skipping.`);
                   return;
                 }
 
-                // Parse email content with AI
                 const emailContent = parsed.text || parsed.html || '';
                 const parseResult = await parseVendorResponse(emailContent);
 
@@ -209,7 +188,6 @@ async function monitorInbox() {
 
                 const proposalData = parseResult.data;
 
-                // Check if proposal already exists from this vendor for this RFP
                 const existingProposal = await Proposal.findOne({
                   where: {
                     rfpId: rfp.id,
@@ -222,7 +200,6 @@ async function monitorInbox() {
                   return;
                 }
 
-                // Create proposal in database
                 await Proposal.create({
                   rfpId: rfp.id,
                   vendorId: vendor.id,
@@ -274,31 +251,24 @@ async function monitorInbox() {
   });
 }
 
-/**
- * Start background job to monitor inbox periodically
- */
+
 function startEmailMonitoring() {
-  const interval = parseInt(process.env.EMAIL_CHECK_INTERVAL) || 300000; // Default: 5 minutes
+  const interval = parseInt(process.env.EMAIL_CHECK_INTERVAL) || 300000;
   
   console.log(`Starting email monitoring (checking every ${interval / 1000} seconds)...`);
-  
-  // Run immediately on start
+
   monitorInbox().catch(err => console.error('Email monitoring error:', err));
-  
-  // Then run periodically
+
   setInterval(() => {
     monitorInbox().catch(err => console.error('Email monitoring error:', err));
   }, interval);
 }
 
-/**
- * Send proposal status notification email to vendor
- */
+
 async function sendProposalStatusEmail(proposal, status, customEmailBody = null) {
   try {
     const { generateStatusEmail } = require('./aiService');
 
-    // Get full proposal with RFP and Vendor details
     const fullProposal = await Proposal.findByPk(proposal.id, {
       include: [
         { model: RFP, as: 'rfp' },
@@ -311,8 +281,7 @@ async function sendProposalStatusEmail(proposal, status, customEmailBody = null)
     }
 
     let emailBody;
-    
-    // Use custom email body if provided, otherwise generate with AI
+
     if (customEmailBody) {
       emailBody = customEmailBody;
     } else {
@@ -330,12 +299,10 @@ async function sendProposalStatusEmail(proposal, status, customEmailBody = null)
       emailBody = emailResult.emailBody;
     }
 
-    // Determine subject based on status
     const subject = status === 'accepted'
       ? `✓ Proposal Accepted - ${fullProposal.rfp.title}`
       : `Proposal Update - ${fullProposal.rfp.title}`;
 
-    // Send email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: fullProposal.vendor.email,

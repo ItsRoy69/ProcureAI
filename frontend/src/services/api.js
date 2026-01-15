@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Create axios instance with base URL
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
   headers: {
@@ -8,7 +7,6 @@ const api = axios.create({
   }
 });
 
-// Request interceptor
 api.interceptors.request.use(
   (config) => {
     return config;
@@ -18,7 +16,6 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
 api.interceptors.response.use(
   (response) => {
     return response.data;
@@ -30,7 +27,6 @@ api.interceptors.response.use(
   }
 );
 
-// RFP API
 export const rfpAPI = {
   createFromNL: (userInput) => api.post('/rfps/create-from-nl', { userInput }),
   getAll: (status) => api.get('/rfps', { params: { status } }),
@@ -41,7 +37,6 @@ export const rfpAPI = {
   getProposals: (id) => api.get(`/rfps/${id}/proposals`)
 };
 
-// Vendor API
 export const vendorAPI = {
   create: (data) => api.post('/vendors', data),
   getAll: () => api.get('/vendors'),
@@ -50,7 +45,6 @@ export const vendorAPI = {
   delete: (id) => api.delete(`/vendors/${id}`)
 };
 
-// Proposal API
 export const proposalAPI = {
   getByRFP: (rfpId) => api.get(`/proposals/rfp/${rfpId}`),
   getById: (id) => api.get(`/proposals/${id}`),
