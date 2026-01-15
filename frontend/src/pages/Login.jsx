@@ -1,32 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Card,
-  CardContent,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-  InputAdornment,
-  IconButton,
-  Grid,
-  Link,
-  useMediaQuery,
-  useTheme
-} from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import EmailIcon from '@mui/icons-material/Email';
-import LockIcon from '@mui/icons-material/Lock';
-import PersonIcon from '@mui/icons-material/Person';
+import { VisibilityIcon, VisibilityOffIcon, EmailIcon, LockIcon, PersonIcon } from '../components/Icons';
 import { useAuth } from '../context/AuthContext';
+import { Alert } from '../components/UIComponents';
+import './Login.css';
 
 function Login() {
   const navigate = useNavigate();
   const { login, register } = useAuth();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -71,232 +53,129 @@ function Login() {
   };
 
   return (
-    <Grid container sx={{ minHeight: '100vh' }}>
-      {/* Left Side - Brand / Visual */}
+    <div className="login-container">
+      {/* Left Side - Brand */}
       {!isMobile && (
-        <Grid item md={6} lg={5} sx={{ 
-          bgcolor: '#4F46E5', 
-          display: 'flex', 
-          flexDirection: 'column',
-          justifyContent: 'center',
-          p: 8,
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          {/* Abstract background shapes */}
-          <Box sx={{
-            position: 'absolute',
-            top: -100,
-            left: -100,
-            width: 400,
-            height: 400,
-            borderRadius: '50%',
-            bgcolor: 'rgba(255,255,255,0.05)'
-          }} />
-          <Box sx={{
-            position: 'absolute',
-            bottom: -50,
-            right: -50,
-            width: 300,
-            height: 300,
-            borderRadius: '50%',
-            bgcolor: 'rgba(255,255,255,0.05)'
-          }} />
-
-          <Box sx={{ position: 'relative', zIndex: 1 }}>
-            <Box sx={{ 
-              width: 56, 
-              height: 56, 
-              bgcolor: 'white', 
-              color: '#4F46E5', 
-              borderRadius: 3, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '1.75rem',
-              mb: 4
-            }}>
-              P
-            </Box>
-            <Typography variant="h3" sx={{ fontWeight: 800, mb: 2 }}>
-              Smart Procurement Simplified.
-            </Typography>
-            <Typography variant="h6" sx={{ opacity: 0.8, fontWeight: 400 }}>
+        <div className="login-brand">
+          <div className="login-brand-bg-1"></div>
+          <div className="login-brand-bg-2"></div>
+          
+          <div className="login-brand-content">
+            <div className="login-brand-logo">P</div>
+            <h1 className="login-brand-title">Smart Procurement Simplified.</h1>
+            <p className="login-brand-subtitle">
               Join thousands of companies automating their RFP process with the power of AI.
-            </Typography>
-          </Box>
-        </Grid>
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Right Side - Form */}
-      <Grid item xs={12} md={6} lg={7} sx={{ 
-        bgcolor: '#FFFFFF', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        p: 2
-      }}>
-        <Box sx={{ width: '100%', maxWidth: 420, p: 2 }}>
+      <div className="login-form-container">
+        <div className="login-form-wrapper">
           {isMobile && (
-            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Box sx={{ 
-                width: 36, 
-                height: 36, 
-                bgcolor: '#4F46E5', 
-                color: 'white', 
-                borderRadius: 1.5, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontWeight: 700
-              }}>
-                P
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827' }}>
-                ProcureAI
-              </Typography>
-            </Box>
+            <div className="login-mobile-header">
+              <div className="login-mobile-logo">P</div>
+              <h2 className="login-mobile-title">ProcureAI</h2>
+            </div>
           )}
 
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#111827', mb: 1 }}>
+          <h2 className="login-title">
             {isLogin ? 'Welcome back' : 'Create an account'}
-          </Typography>
-          <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
+          </h2>
+          <p className="login-subtitle">
             {isLogin ? 'Please enter your details to sign in.' : 'Start your 14-day free trial today.'}
-          </Typography>
+          </p>
 
           {error && (
-            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+            <Alert type="error" onClose={() => setError('')}>
               {error}
             </Alert>
           )}
 
           <form onSubmit={handleSubmit}>
             {!isLogin && (
-              <Box sx={{ mb: 2.5 }}>
-                <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: 600, color: '#374151' }}>
-                  Full Name
-                </Typography>
-                <TextField
-                  fullWidth
-                  placeholder="John Doe"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required={!isLogin}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon sx={{ color: '#9CA3AF' }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-                />
-              </Box>
+              <div className="form-group">
+                <label className="label">Full Name</label>
+                <div className="input-group">
+                  <PersonIcon width={20} height={20} className="input-icon" />
+                  <input
+                    className="input input-with-icon"
+                    placeholder="John Doe"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required={!isLogin}
+                  />
+                </div>
+              </div>
             )}
 
-            <Box sx={{ mb: 2.5 }}>
-              <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: 600, color: '#374151' }}>
-                Email
-              </Typography>
-              <TextField
-                fullWidth
-                placeholder="name@company.com"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon sx={{ color: '#9CA3AF' }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-              />
-            </Box>
+            <div className="form-group">
+              <label className="label">Email</label>
+              <div className="input-group">
+                <EmailIcon width={20} height={20} className="input-icon" />
+                <input
+                  className="input input-with-icon"
+                  placeholder="name@company.com"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
 
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="subtitle2" sx={{ mb: 0.5, fontWeight: 600, color: '#374151' }}>
-                Password
-              </Typography>
-              <TextField
-                fullWidth
-                placeholder="••••••••"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                required
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockIcon sx={{ color: '#9CA3AF' }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-              />
-            </Box>
+            <div className="form-group">
+              <label className="label">Password</label>
+              <div className="input-group">
+                <LockIcon width={20} height={20} className="input-icon" />
+                <input
+                  className="input input-with-icon"
+                  style={{ paddingRight: '2.5rem' }}
+                  placeholder="••••••••"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  className="input-toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <VisibilityOffIcon width={20} height={20} /> : <VisibilityIcon width={20} height={20} />}
+                </button>
+              </div>
+            </div>
 
-            <Button
+            <button
               type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
+              className="btn btn-primary w-full btn-lg"
               disabled={loading}
-              sx={{
-                bgcolor: '#4F46E5',
-                '&:hover': { bgcolor: '#4338CA' },
-                py: 1.5,
-                borderRadius: 1.5,
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '1rem',
-                boxShadow: 'none',
-                mb: 3
-              }}
+              style={{ marginBottom: '1.5rem' }}
             >
               {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
-            </Button>
+            </button>
 
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="body2" color="textSecondary">
+            <div style={{ textAlign: 'center' }}>
+              <p className="text-sm text-gray-500">
                 {isLogin ? "Don't have an account? " : "Already have an account? "}
-                <Link
-                  component="button"
+                <button
                   type="button"
+                  className="login-toggle-link"
                   onClick={() => setIsLogin(!isLogin)}
-                  sx={{
-                    color: '#4F46E5',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    '&:hover': { textDecoration: 'underline' }
-                  }}
                 >
                   {isLogin ? 'Sign up' : 'Sign in'}
-                </Link>
-              </Typography>
-            </Box>
+                </button>
+              </p>
+            </div>
           </form>
-        </Box>
-      </Grid>
-    </Grid>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,30 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Box,
-  Typography,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-  Avatar,
-  Menu,
-  MenuItem
-} from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import DescriptionIcon from '@mui/icons-material/Description';
-import PeopleIcon from '@mui/icons-material/People';
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
-import LogoutIcon from '@mui/icons-material/Logout';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { 
+  DashboardIcon, 
+  DescriptionIcon, 
+  PeopleIcon, 
+  CompareArrowsIcon, 
+  LogoutIcon, 
+  MoreVertIcon 
+} from './Icons';
 import { useAuth } from '../context/AuthContext';
+import './Sidebar.css';
 
-const DRAWER_WIDTH = 240;
+export const DRAWER_WIDTH = 240;
 
 const menuItems = [
   { text: 'Overview', icon: DashboardIcon, path: '/' },
@@ -36,189 +23,96 @@ const menuItems = [
 function Sidebar({ mobileOpen, onDrawerToggle }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { user, logout } = useAuth();
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
   const drawerContent = (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="sidebar-content">
       {/* Header */}
-      <Box sx={{ 
-        p: 2, 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: 1.5,
-        borderBottom: '1px solid #E5E7EB',
-        minHeight: 64
-      }}>
-        <Box sx={{
-          width: 32,
-          height: 32,
-          borderRadius: 1.5,
-          background: '#4F46E5',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          fontWeight: 700,
-          fontSize: '1rem'
-        }}>
-          P
-        </Box>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#111827', letterSpacing: '-0.01em' }}>
-          ProcureAI
-        </Typography>
-      </Box>
+      <div className="sidebar-header">
+        <div className="sidebar-logo">P</div>
+        <h2 className="sidebar-title">ProcureAI</h2>
+      </div>
 
       {/* Navigation */}
-      <List sx={{ px: 1.5, pt: 2, flex: 1 }}>
-        <Typography variant="caption" sx={{ px: 1.5, mb: 1, display: 'block', color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.7rem' }}>
-          Menu
-        </Typography>
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          
-          return (
-            <ListItem key={item.text} disablePadding sx={{ mb: 0.25 }}>
-              <ListItemButton
-                onClick={() => {
-                  navigate(item.path);
-                  if (isMobile) onDrawerToggle();
-                }}
-                sx={{
-                  borderRadius: 1,
-                  py: 0.75,
-                  px: 1.5,
-                  minHeight: 36,
-                  bgcolor: isActive ? '#EEF2FF' : 'transparent',
-                  color: isActive ? '#4F46E5' : '#4B5563',
-                  '&:hover': {
-                    bgcolor: isActive ? '#EEF2FF' : '#F9FAFB',
-                    color: isActive ? '#4F46E5' : '#111827',
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 32, color: 'inherit' }}>
-                  <Icon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText 
-                  primary={item.text}
-                  primaryTypographyProps={{
-                    fontSize: '0.875rem',
-                    fontWeight: isActive ? 600 : 500,
+      <nav className="sidebar-nav">
+        <p className="sidebar-nav-label">MENU</p>
+        <ul>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <li key={item.text}>
+                <button
+                  className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                  onClick={() => {
+                    navigate(item.path);
+                    if (mobileOpen) onDrawerToggle();
                   }}
-                />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
-      </List>
+                >
+                  <Icon width={18} height={18} />
+                  <span>{item.text}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
       
       {/* User Actions */}
-      <Box sx={{ p: 2, borderTop: '1px solid #E5E7EB' }}>
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            p: 1,
-            borderRadius: 1,
-            '&:hover': { bgcolor: '#F9FAFB', cursor: 'pointer' }
-          }}
-          onClick={handleMenuOpen}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: '#4F46E5', fontSize: '0.875rem' }}>
+      <div className="sidebar-footer">
+        <div className="sidebar-user" onClick={() => setMenuOpen(!menuOpen)}>
+          <div className="flex items-center gap-3">
+            <div className="avatar avatar-sm">
               {user?.email?.charAt(0).toUpperCase() || 'A'}
-            </Avatar>
-            <Box sx={{ overflow: 'hidden' }}>
-              <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, color: '#374151', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
+            </div>
+            <div className="sidebar-user-info">
+              <p className="sidebar-user-name">
                 {user?.email?.split('@')[0]}
-              </Typography>
-              <Typography variant="caption" sx={{ display: 'block', color: '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
+              </p>
+              <p className="sidebar-user-email">
                 {user?.email}
-              </Typography>
-            </Box>
-          </Box>
-          <MoreVertIcon sx={{ color: '#9CA3AF', fontSize: 20 }} />
-        </Box>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-        >
-          <MenuItem onClick={handleLogout} sx={{ color: '#EF4444' }}>
-            <ListItemIcon>
-              <LogoutIcon fontSize="small" sx={{ color: '#EF4444' }} />
-            </ListItemIcon>
-            <ListItemText>Sign out</ListItemText>
-          </MenuItem>
-        </Menu>
-      </Box>
-    </Box>
+              </p>
+            </div>
+          </div>
+          <MoreVertIcon width={20} height={20} className="text-gray-400" />
+        </div>
+        {menuOpen && (
+          <div className="sidebar-menu">
+            <button onClick={handleLogout} className="sidebar-menu-item">
+              <LogoutIcon width={16} height={16} />
+              Sign out
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 
   return (
-    <Box component="nav" sx={{ width: { md: DRAWER_WIDTH }, flexShrink: { md: 0 } }}>
-      {isMobile ? (
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={onDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            '& .MuiDrawer-paper': {
-              width: DRAWER_WIDTH,
-              boxSizing: 'border-box',
-              border: 'none',
-              bgcolor: 'white',
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
-      ) : (
-        <Drawer
-          variant="permanent"
-          sx={{
-            '& .MuiDrawer-paper': {
-              width: DRAWER_WIDTH,
-              boxSizing: 'border-box',
-              borderRight: '1px solid #E5E7EB',
-              bgcolor: 'white',
-            },
-          }}
-          open
-        >
-          {drawerContent}
-        </Drawer>
+    <aside className="sidebar-wrapper">
+      {/* Mobile Drawer */}
+      {mobileOpen && (
+        <>
+          <div className="sidebar-backdrop" onClick={onDrawerToggle}></div>
+          <div className="sidebar sidebar-mobile">
+            {drawerContent}
+          </div>
+        </>
       )}
-    </Box>
+      
+      {/* Desktop Sidebar */}
+      <div className="sidebar sidebar-desktop">
+        {drawerContent}
+      </div>
+    </aside>
   );
 }
 
 export default Sidebar;
-export { DRAWER_WIDTH };

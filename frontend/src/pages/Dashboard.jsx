@@ -1,36 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  IconButton,
-  Tooltip,
-  Divider
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DescriptionIcon from '@mui/icons-material/Description';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import SendIcon from '@mui/icons-material/Send';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import { 
+  AddIcon, 
+  DescriptionIcon, 
+  TrendingUpIcon, 
+  SendIcon, 
+  CheckCircleIcon, 
+  MoreHorizIcon, 
+  FilterListIcon 
+} from '../components/Icons';
+import { Modal } from '../components/UIComponents';
 import { rfpAPI } from '../services/api';
+import './Dashboard.css';
 
 function Dashboard() {
   const navigate = useNavigate();
   const [rfps, setRfps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filters, setFilters] = useState({
+    status: 'all',
+    dateFrom: '',
+    dateTo: '',
+    searchTerm: ''
+  });
 
   useEffect(() => {
     loadRFPs();
@@ -49,272 +42,336 @@ function Dashboard() {
     }
   };
 
+  // Apply filters to RFPs (must be before stats calculation)
+  const filteredRfps = rfps.filter(rfp => {
+    // Status filter
+    if (filters.status !== 'all' && rfp.status !== filters.status) {
+      return false;
+    }
+
+    // Search term filter
+    if (filters.searchTerm && !rfp.title.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
+      return false;
+    }
+
+    // Date range filter
+    if (filters.dateFrom) {
+      const rfpDate = new Date(rfp.createdAt);
+      const fromDate = new Date(filters.dateFrom);
+      if (rfpDate < fromDate) return false;
+    }
+
+    if (filters.dateTo) {
+      const rfpDate = new Date(rfp.createdAt);
+      const toDate = new Date(filters.dateTo);
+      if (rfpDate > toDate) return false;
+    }
+
+    return true;
+  });
+
   const stats = {
-    total: rfps.length,
-    draft: rfps.filter(r => r.status === 'draft').length,
-    sent: rfps.filter(r => r.status === 'sent').length,
-    closed: rfps.filter(r => r.status === 'closed').length,
+    total: filteredRfps.length,
+    draft: filteredRfps.filter(r => r.status === 'draft').length,
+    sent: filteredRfps.filter(r => r.status === 'sent').length,
+    closed: filteredRfps.filter(r => r.status === 'closed').length,
   };
 
   const getStatusChip = (status) => {
     const config = {
-      draft: { bg: '#FFF7ED', color: '#C2410C', label: 'Draft' }, // Orange-50/700
-      sent: { bg: '#EFF6FF', color: '#1D4ED8', label: 'Sent' },   // Blue-50/700
-      closed: { bg: '#F0FDFA', color: '#0F766E', label: 'Closed' } // Teal-50/700
-    }[status] || { bg: '#F3F4F6', color: '#374151', label: status };
+      draft: { className: 'chip-warning', label: 'Draft' },
+      sent: { className: 'chip-info', label: 'Sent' },
+      closed: { className: 'chip-success', label: 'Closed' }
+    }[status] || { className: 'chip-gray', label: status };
 
-    return (
-      <Chip 
-        label={config.label} 
-        size="small" 
-        sx={{ 
-          bgcolor: config.bg, 
-          color: config.color, 
-          fontWeight: 600, 
-          borderRadius: '4px', // Square-ish look typical of enterprise apps
-          height: '24px',
-          fontSize: '0.75rem',
-          border: '1px solid',
-          borderColor: 'transparent'
-        }} 
-      />
-    );
+    return <span className={`chip ${config.className}`}>{config.label}</span>;
   };
 
-  const StatCard = ({ title, value, icon, trend }) => (
-    <Card elevation={0} sx={{
-      border: '1px solid #E5E7EB',
-      borderRadius: 1.5,
-      height: '100%'
-    }}>
-      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Box>
-            <Typography variant="caption" color="textSecondary" sx={{ mb: 0.5, fontWeight: 500, display: 'block' }}>
-              {title}
-            </Typography>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#111827', mb: 0.5 }}>
-              {value}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography variant="caption" sx={{ color: '#10B981', fontWeight: 600, bgcolor: '#ECFDF5', px: 0.5, py: 0.25, borderRadius: 0.5 }}>
-                {trend}
-              </Typography>
-              <Typography variant="caption" color="textSecondary">
-                vs last month
-              </Typography>
-            </Box>
-          </Box>
-          <Box sx={{ 
-            p: 0.75, 
-            borderRadius: 1, 
-            bgcolor: '#F9FAFB', 
-            color: '#6B7280',
-            border: '1px solid #F3F4F6'
-          }}>
-            {icon}
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
+  const handleFilter = () => {
+    setShowFilterModal(true);
+  };
+
+  const handleApplyFilters = () => {
+    setShowFilterModal(false);
+    // Filters are applied automatically via filteredRfps
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      status: 'all',
+      dateFrom: '',
+      dateTo: '',
+      searchTerm: ''
+    });
+  };
+
+  const handleExport = () => {
+    // Create CSV content
+    const headers = ['ID', 'Title', 'Status', 'Budget', 'Created Date', 'Deadline'];
+    const csvRows = [headers.join(',')];
+
+    filteredRfps.forEach(rfp => {
+      const row = [
+        rfp.id,
+        `"${rfp.title}"`, // Wrap in quotes to handle commas
+        rfp.status,
+        rfp.budget || 'N/A',
+        new Date(rfp.createdAt).toLocaleDateString(),
+        rfp.deadline ? new Date(rfp.deadline).toLocaleDateString() : 'N/A'
+      ];
+      csvRows.push(row.join(','));
+    });
+
+    const csvContent = csvRows.join('\n');
+    
+    // Create download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `rfps_export_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const StatCard = ({ title, value, icon: Icon, trend }) => (
+    <div className="card">
+      <div className="card-body card-body-sm">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="text-xs text-gray-500 font-medium mb-1">{title}</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">{value}</h3>
+            <div className="flex items-center gap-1">
+              <span className="chip chip-success text-xs">{trend}</span>
+              <span className="text-xs text-gray-500">vs last month</span>
+            </div>
+          </div>
+          <div className="stat-icon">
+            <Icon width={20} height={20} />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
   return (
-    <Box sx={{ maxWidth: '100%' }}>
-      {/* Header - Compact */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, color: '#111827' }}>
-          Overview
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-           <Button
-            variant="outlined"
-            size="small"
-            startIcon={<FilterListIcon />}
-            sx={{ 
-              borderRadius: 1, 
-              textTransform: 'none', 
-              borderColor: '#D1D5DB', 
-              color: '#374151',
-              fontWeight: 500
-            }}
+    <div className="dashboard-container">
+      {/* Header */}
+      <div className="dashboard-header">
+        <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
+        <div className="flex gap-2">
+          <button 
+            className="btn btn-outlined btn-sm"
+            onClick={handleFilter}
           >
+            <FilterListIcon width={16} height={16} />
             Filter
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon />}
+          </button>
+          <button 
+            className="btn btn-primary btn-sm"
             onClick={() => navigate('/rfp/create')}
-            sx={{
-              bgcolor: '#4F46E5',
-              borderRadius: 1,
-              textTransform: 'none',
-              fontWeight: 500,
-              boxShadow: 'none',
-              '&:hover': { bgcolor: '#4338CA', boxShadow: 'none' }
-            }}
           >
+            <AddIcon width={16} height={16} />
             Create RFP
-          </Button>
-        </Box>
-      </Box>
+          </button>
+        </div>
+      </div>
 
-      {/* Stats - Dense Grid */}
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total RFPs"
-            value={stats.total}
-            trend="+12%"
-            icon={<DescriptionIcon fontSize="small" />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Drafts"
-            value={stats.draft}
-            trend="+2%"
-            icon={<TrendingUpIcon fontSize="small" />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Active Sent"
-            value={stats.sent}
-            trend="+5%"
-            icon={<SendIcon fontSize="small" />}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Completed"
-            value={stats.closed}
-            trend="+8%"
-            icon={<CheckCircleIcon fontSize="small" />}
-          />
-        </Grid>
-      </Grid>
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <StatCard
+          title="Total RFPs"
+          value={stats.total}
+          trend="+12%"
+          icon={DescriptionIcon}
+        />
+        <StatCard
+          title="Drafts"
+          value={stats.draft}
+          trend="+2%"
+          icon={TrendingUpIcon}
+        />
+        <StatCard
+          title="Active Sent"
+          value={stats.sent}
+          trend="+5%"
+          icon={SendIcon}
+        />
+        <StatCard
+          title="Completed"
+          value={stats.closed}
+          trend="+8%"
+          icon={CheckCircleIcon}
+        />
+      </div>
 
-      {/* Main Content - Compact Two Column Layout */}
-      <Grid container spacing={2} sx={{ mt: 2, minHeight: 'calc(100vh - 280px)' }}>
-        {/* Recent Transactions / Table */}
-        <Grid item xs={12} md={7} lg={8}>
-          <Card elevation={0} sx={{ border: '1px solid #E5E7EB', borderRadius: 1.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ 
-              p: 1.5, 
-              borderBottom: '1px solid #E5E7EB', 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center' 
-            }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#111827' }}>
-                Recent Activity
-              </Typography>
-              <Button size="small" sx={{ textTransform: 'none', color: '#4F46E5', fontWeight: 500 }}>
-                View All
-              </Button>
-            </Box>
-            <TableContainer sx={{ overflowX: 'auto', flex: 1 }}>
-              <Table size="small" sx={{ minWidth: 650 }}>
-                <TableHead sx={{ bgcolor: '#F9FAFB' }}>
-                  <TableRow>
-                    <TableCell sx={{ color: '#6B7280', fontSize: '0.75rem', fontWeight: 600, py: 1.5, width: '40%' }}>PROJECT NAME</TableCell>
-                    <TableCell sx={{ color: '#6B7280', fontSize: '0.75rem', fontWeight: 600, py: 1.5, width: '15%' }}>STATUS</TableCell>
-                    <TableCell sx={{ color: '#6B7280', fontSize: '0.75rem', fontWeight: 600, py: 1.5, width: '20%' }}>BUDGET</TableCell>
-                    <TableCell sx={{ color: '#6B7280', fontSize: '0.75rem', fontWeight: 600, py: 1.5, width: '20%' }}>DATE</TableCell>
-                    <TableCell sx={{ width: '5%' }}></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rfps.slice(0, 6).map((rfp) => (
-                    <TableRow 
-                      key={rfp.id} 
-                      hover
-                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
-                      <TableCell sx={{ py: 1.5 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
-                          {rfp.title}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#6B7280' }}>
-                          ID: #{rfp.id.toString().padStart(4, '0')}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>{getStatusChip(rfp.status)}</TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
-                        <Typography variant="body2" sx={{ color: '#374151' }}>
-                          ${rfp.budget?.toLocaleString() || '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
-                        <Typography variant="body2" sx={{ color: '#374151' }}>
-                          {new Date(rfp.createdAt).toLocaleDateString()}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
-                        <IconButton size="small" onClick={() => navigate(`/rfp/${rfp.id}`)}>
-                          <MoreHorizIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
+      {/* Main Content */}
+      <div className="dashboard-content">
+        {/* Recent Activity Table */}
+        <div className="dashboard-main">
+          <div className="card">
+            <div className="card-header flex justify-between items-center">
+              <h2 className="text-base font-semibold text-gray-900">Recent Activity</h2>
+              <button className="btn-text">View All</button>
+            </div>
+            <div className="table-container">
+              <table className="table table-sm">
+                <thead>
+                  <tr>
+                    <th style={{ width: '40%' }}>PROJECT NAME</th>
+                    <th style={{ width: '15%' }}>STATUS</th>
+                    <th style={{ width: '20%' }}>BUDGET</th>
+                    <th style={{ width: '20%' }}>DATE</th>
+                    <th style={{ width: '5%' }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRfps.slice(0, 6).map((rfp) => (
+                    <tr key={rfp.id}>
+                      <td>
+                        <div>
+                          <p className="font-medium text-gray-900 truncate" style={{ maxWidth: '300px' }}>
+                            {rfp.title}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            ID: #{rfp.id.toString().padStart(4, '0')}
+                          </p>
+                        </div>
+                      </td>
+                      <td>{getStatusChip(rfp.status)}</td>
+                      <td className="text-gray-700">
+                        ${rfp.budget?.toLocaleString() || '-'}
+                      </td>
+                      <td className="text-gray-700">
+                        {new Date(rfp.createdAt).toLocaleDateString()}
+                      </td>
+                      <td>
+                        <button 
+                          className="btn-icon"
+                          onClick={() => navigate(`/rfp/${rfp.id}`)}
+                        >
+                          <MoreHorizIcon width={20} height={20} />
+                        </button>
+                      </td>
+                    </tr>
                   ))}
-                  {rfps.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} align="center" sx={{ py: 4, color: '#6B7280' }}>
-                        No data available
-                      </TableCell>
-                    </TableRow>
+                  {filteredRfps.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="text-center text-gray-500" style={{ padding: '2rem' }}>
+                        {rfps.length === 0 ? 'No data available' : 'No RFPs match your filters'}
+                      </td>
+                    </tr>
                   )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Card>
-        </Grid>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
-        {/* Side Panel - Quick Actions */}
-        <Grid item xs={12} md={5} lg={4}>
-          <Card elevation={0} sx={{ border: '1px solid #E5E7EB', borderRadius: 1.5, height: '100%' }}>
-            <CardContent sx={{ p: 1.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#111827', mb: 2 }}>
-                Quick Actions
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button 
-                  variant="outlined" 
-                  fullWidth 
+        {/* Side Panel */}
+        <div className="dashboard-sidebar">
+          <div className="card">
+            <div className="card-body card-body-sm">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="flex flex-col gap-2">
+                <button 
+                  className="btn btn-outlined w-full"
                   onClick={() => navigate('/vendors')}
-                  sx={{ 
-                    justifyContent: 'flex-start', 
-                    borderColor: '#E5E7EB', 
-                    color: '#374151',
-                    textTransform: 'none',
-                    '&:hover': { borderColor: '#D1D5DB', bgcolor: '#F9FAFB' }
-                  }}
-                  startIcon={<AddIcon fontSize="small" />}
+                  style={{ justifyContent: 'flex-start' }}
                 >
+                  <AddIcon width={16} height={16} />
                   New Vendor
-                </Button>
-                <Button 
-                  variant="outlined" 
-                  fullWidth 
-                  sx={{ 
-                    justifyContent: 'flex-start', 
-                    borderColor: '#E5E7EB', 
-                    color: '#374151',
-                    textTransform: 'none',
-                    '&:hover': { borderColor: '#D1D5DB', bgcolor: '#F9FAFB' }
-                  }}
-                  startIcon={<DescriptionIcon fontSize="small" />}
+                </button>
+                <button 
+                  className="btn btn-outlined w-full"
+                  onClick={handleExport}
+                  style={{ justifyContent: 'flex-start' }}
                 >
+                  <DescriptionIcon width={16} height={16} />
                   Export Report
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Box>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Modal */}
+      <Modal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        title="Filter RFPs"
+        footer={
+          <>
+            <button className="btn btn-secondary" onClick={handleClearFilters}>
+              Clear Filters
+            </button>
+            <button className="btn btn-primary" onClick={handleApplyFilters}>
+              Apply Filters
+            </button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4" style={{ paddingTop: '1rem' }}>
+          <div>
+            <label className="label">Search by Title</label>
+            <input
+              className="input w-full"
+              placeholder="Search RFPs..."
+              value={filters.searchTerm}
+              onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="label">Status</label>
+            <select
+              className="input w-full"
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            >
+              <option value="all">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label">Date From</label>
+              <input
+                type="date"
+                className="input w-full"
+                value={filters.dateFrom}
+                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="label">Date To</label>
+              <input
+                type="date"
+                className="input w-full"
+                value={filters.dateTo}
+                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {(filters.status !== 'all' || filters.searchTerm || filters.dateFrom || filters.dateTo) && (
+            <div className="alert alert-info" style={{ marginTop: '0.5rem' }}>
+              <p className="text-sm">
+                Active filters: {filteredRfps.length} of {rfps.length} RFPs shown
+              </p>
+            </div>
+          )}
+        </div>
+      </Modal>
+    </div>
   );
 }
 

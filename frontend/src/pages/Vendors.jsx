@@ -1,29 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Chip,
-  IconButton,
-  Avatar,
-  alpha,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Alert
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EmailIcon from '@mui/icons-material/Email';
-import PhoneIcon from '@mui/icons-material/Phone';
-import BusinessIcon from '@mui/icons-material/Business';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { AddIcon, EmailIcon, PhoneIcon, BusinessIcon, MoreVertIcon, CheckCircleIcon } from '../components/Icons';
+import { Modal, Alert } from '../components/UIComponents';
 import { vendorAPI } from '../services/api';
 
 function Vendors() {
@@ -83,255 +61,201 @@ function Vendors() {
   };
 
   return (
-    <Box>
-      <Box sx={{ 
-        mb: 4, 
-        display: 'flex', 
-        flexDirection: { xs: 'column', sm: 'row' },
-        justifyContent: 'space-between', 
-        alignItems: { xs: 'flex-start', sm: 'center' },
-        gap: 2
-      }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#111827', mb: 0.5, fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
+    <div>
+      <div className="flex justify-between items-center" style={{ marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900" style={{ marginBottom: '0.5rem' }}>
             Vendors
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#6B7280' }}>
+          </h1>
+          <p className="text-sm text-gray-500">
             Manage your vendor relationships and contacts
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          size="large"
-          startIcon={<AddIcon />}
+          </p>
+        </div>
+        <button
+          className="btn btn-primary btn-lg"
           onClick={() => setOpenDialog(true)}
-          fullWidth={{ xs: true, sm: false }}
-          sx={{
-            bgcolor: '#6366F1',
-            borderRadius: 2,
-            px: 3,
-            py: 1.25,
-            textTransform: 'none',
-            fontWeight: 600,
-            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
-            '&:hover': {
-              bgcolor: '#4F46E5',
-              boxShadow: '0 6px 16px rgba(99, 102, 241, 0.4)',
-            }
-          }}
+          style={{ boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)' }}
         >
+          <AddIcon width={20} height={20} />
           Add Vendor
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+        <Alert type="error" onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ border: '1px solid #F3F4F6', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                <Box sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: alpha('#6366F1', 0.1),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <BusinessIcon sx={{ fontSize: 24, color: '#6366F1' }} />
-                </Box>
-              </Box>
-              <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5, fontWeight: 500 }}>
-                Total Vendors
-              </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#111827' }}>
-                {vendors.length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ border: '1px solid #F3F4F6', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-                <Box sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: alpha('#10B981', 0.1),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <CheckCircleIcon sx={{ fontSize: 24, color: '#10B981' }} />
-                </Box>
-              </Box>
-              <Typography variant="body2" sx={{ color: '#6B7280', mb: 0.5, fontWeight: 500 }}>
-                Active Vendors
-              </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#111827' }}>
-                {vendors.filter(v => v.proposals && v.proposals.length > 0).length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" style={{ marginBottom: '2rem' }}>
+        <div className="card" style={{ border: '1px solid #F3F4F6', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)', borderRadius: '0.75rem' }}>
+          <div className="card-body">
+            <div className="flex justify-between items-start" style={{ marginBottom: '1.5rem' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '0.5rem',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <BusinessIcon width={24} height={24} style={{ color: '#6366F1' }} />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 font-medium" style={{ marginBottom: '0.5rem' }}>
+              Total Vendors
+            </p>
+            <h3 className="text-4xl font-bold text-gray-900">
+              {vendors.length}
+            </h3>
+          </div>
+        </div>
+        <div className="card" style={{ border: '1px solid #F3F4F6', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)', borderRadius: '0.75rem' }}>
+          <div className="card-body">
+            <div className="flex justify-between items-start" style={{ marginBottom: '1.5rem' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '0.5rem',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CheckCircleIcon width={24} height={24} style={{ color: '#10B981' }} />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 font-medium" style={{ marginBottom: '0.5rem' }}>
+              Active Vendors
+            </p>
+            <h3 className="text-4xl font-bold text-gray-900">
+              {vendors.filter(v => v.proposals && v.proposals.length > 0).length}
+            </h3>
+          </div>
+        </div>
+      </div>
 
       {loading ? (
-        <Typography>Loading...</Typography>
+        <p>Loading...</p>
       ) : vendors.length === 0 ? (
-        <Card sx={{ p: 8, textAlign: 'center', borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-          <Typography variant="h6" color="text.secondary">
+        <div className="card" style={{ padding: '4rem', textAlign: 'center', borderRadius: '0.75rem', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+          <h3 className="text-lg text-gray-500">
             No vendors yet. Add your first vendor to get started!
-          </Typography>
-        </Card>
+          </h3>
+        </div>
       ) : (
-        <Grid container spacing={2}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {vendors.map((vendor) => {
             const stats = getVendorStats(vendor);
             return (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={vendor.id}>
-                <Card elevation={0} sx={{
-                  border: '1px solid #E5E7EB',
-                  borderRadius: 1.5,
-                  height: '100%',
-                  '&:hover': {
-                    borderColor: '#6366F1',
-                    bgcolor: '#F9FAFB'
-                  }
-                }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                      <Avatar sx={{ bgcolor: '#6366F1', width: 48, height: 48 }}>
-                        {vendor.name?.charAt(0)}
-                      </Avatar>
-                      <IconButton size="small" sx={{ color: '#9CA3AF' }}>
-                        <MoreVertIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                    
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#111827', mb: 1 }}>
-                      {vendor.name}
-                    </Typography>
-                    
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-                      {vendor.email && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <EmailIcon sx={{ fontSize: 16, color: '#9CA3AF' }} />
-                          <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                            {vendor.email}
-                          </Typography>
-                        </Box>
-                      )}
-                      {vendor.phone && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <PhoneIcon sx={{ fontSize: 16, color: '#9CA3AF' }} />
-                          <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                            {vendor.phone}
-                          </Typography>
-                        </Box>
-                      )}
-                      {vendor.contactPerson && (
-                        <Box sx={{ mt: 1 }}>
-                          <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
-                            Contact Person
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#111827', fontWeight: 500 }}>
-                            {vendor.contactPerson}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
+              <div key={vendor.id} className="card" style={{ border: '1px solid #E5E7EB', borderRadius: '0.75rem' }}>
+                <div className="card-body">
+                  <div className="flex justify-between items-start" style={{ marginBottom: '1rem' }}>
+                    <div className="avatar avatar-md">
+                      {vendor.name?.charAt(0)}
+                    </div>
+                    <button className="btn-icon">
+                      <MoreVertIcon width={20} height={20} />
+                    </button>
+                  </div>
+                  
+                  <h3 className="text-lg font-semibold text-gray-900" style={{ marginBottom: '0.5rem' }}>
+                    {vendor.name}
+                  </h3>
+                  
+                  <div className="flex flex-col gap-2" style={{ marginBottom: '1rem' }}>
+                    {vendor.email && (
+                      <div className="flex items-center gap-2">
+                        <EmailIcon width={16} height={16} style={{ color: '#9CA3AF' }} />
+                        <p className="text-sm text-gray-500">{vendor.email}</p>
+                      </div>
+                    )}
+                    {vendor.phone && (
+                      <div className="flex items-center gap-2">
+                        <PhoneIcon width={16} height={16} style={{ color: '#9CA3AF' }} />
+                        <p className="text-sm text-gray-500">{vendor.phone}</p>
+                      </div>
+                    )}
+                    {vendor.contactPerson && (
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <p className="text-xs text-gray-400">Contact Person</p>
+                        <p className="text-sm text-gray-900 font-medium">{vendor.contactPerson}</p>
+                      </div>
+                    )}
+                  </div>
 
-                    <Box sx={{ display: 'flex', gap: 1, pt: 2, borderTop: '1px solid #F3F4F6' }}>
-                      <Chip
-                        label={`${stats.proposalCount} proposals`}
-                        size="small"
-                        sx={{
-                          bgcolor: alpha('#6366F1', 0.1),
-                          color: '#6366F1',
-                          fontWeight: 600,
-                          fontSize: '0.75rem'
-                        }}
-                      />
-                      {stats.acceptedCount > 0 && (
-                        <Chip
-                          label={`${stats.acceptedCount} accepted`}
-                          size="small"
-                          sx={{
-                            bgcolor: alpha('#10B981', 0.1),
-                            color: '#065F46',
-                            fontWeight: 600,
-                            fontSize: '0.75rem'
-                          }}
-                        />
-                      )}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+                  <div className="flex gap-2" style={{ paddingTop: '1rem', borderTop: '1px solid #F3F4F6', flexWrap: 'wrap' }}>
+                    <span className="chip chip-primary">
+                      {stats.proposalCount} proposals
+                    </span>
+                    {stats.acceptedCount > 0 && (
+                      <span className="chip chip-success">
+                        {stats.acceptedCount} accepted
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             );
           })}
-        </Grid>
+        </div>
       )}
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600 }}>Add New Vendor</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Company Name"
-              fullWidth
-              required
+      <Modal
+        isOpen={openDialog}
+        onClose={() => setOpenDialog(false)}
+        title="Add New Vendor"
+        footer={
+          <>
+            <button className="btn btn-secondary" onClick={() => setOpenDialog(false)}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={handleAddVendor}>
+              Add Vendor
+            </button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-4" style={{ paddingTop: '1rem' }}>
+          <div>
+            <label className="label">Company Name *</label>
+            <input
+              className="input w-full"
               value={newVendor.name}
               onChange={(e) => setNewVendor({ ...newVendor, name: e.target.value })}
-            />
-            <TextField
-              label="Email"
-              type="email"
-              fullWidth
               required
+            />
+          </div>
+          <div>
+            <label className="label">Email *</label>
+            <input
+              className="input w-full"
+              type="email"
               value={newVendor.email}
               onChange={(e) => setNewVendor({ ...newVendor, email: e.target.value })}
+              required
             />
-            <TextField
-              label="Contact Person"
-              fullWidth
+          </div>
+          <div>
+            <label className="label">Contact Person</label>
+            <input
+              className="input w-full"
               value={newVendor.contactPerson}
               onChange={(e) => setNewVendor({ ...newVendor, contactPerson: e.target.value })}
             />
-            <TextField
-              label="Phone"
-              fullWidth
+          </div>
+          <div>
+            <label className="label">Phone</label>
+            <input
+              className="input w-full"
               value={newVendor.phone}
               onChange={(e) => setNewVendor({ ...newVendor, phone: e.target.value })}
             />
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setOpenDialog(false)} sx={{ textTransform: 'none' }}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleAddVendor}
-            sx={{
-              bgcolor: '#6366F1',
-              textTransform: 'none',
-              '&:hover': { bgcolor: '#4F46E5' }
-            }}
-          >
-            Add Vendor
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+          </div>
+        </div>
+      </Modal>
+    </div>
   );
 }
 
