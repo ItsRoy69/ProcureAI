@@ -32,6 +32,7 @@ app.use((req, res, next) => {
 app.use('/api/rfps', rfpRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/proposals', proposalRoutes);
+app.use('/api/auth', require('./routes/authRoutes'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

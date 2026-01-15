@@ -77,9 +77,19 @@ function ProposalComparison() {
       
       if (result.success) {
         setComparison(result.data);
+        if (result.data.cached) {
+          alert('✓ Loaded cached comparison results (AI quota preserved)');
+        }
       }
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response?.data?.error || err.message;
+      const isQuotaError = err.response?.status === 429 || err.response?.data?.quotaExceeded;
+      
+      if (isQuotaError) {
+        setError('⚠️ AI Quota Exceeded\n\nYou have reached the daily limit for AI comparisons (20 requests/day).\n\nThe comparison results have been saved, so you can view them without using more quota. Refresh the page to see cached results, or wait 24 hours for quota reset.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setComparing(false);
     }

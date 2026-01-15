@@ -1,56 +1,18 @@
-const { sequelize } = require('../config/database');
 const RFP = require('./RFP');
 const Vendor = require('./Vendor');
 const Proposal = require('./Proposal');
-const RFPVendor = require('./RFPVendor');
+const User = require('./User');
 
 // Define associations
-RFP.belongsToMany(Vendor, {
-  through: RFPVendor,
-  foreignKey: 'rfpId',
-  otherKey: 'vendorId',
-  as: 'vendors'
-});
+RFP.hasMany(Proposal, { foreignKey: 'rfpId', as: 'proposals' });
+Proposal.belongsTo(RFP, { foreignKey: 'rfpId' });
 
-Vendor.belongsToMany(RFP, {
-  through: RFPVendor,
-  foreignKey: 'vendorId',
-  otherKey: 'rfpId',
-  as: 'rfps'
-});
-
-RFP.hasMany(Proposal, {
-  foreignKey: 'rfpId',
-  as: 'proposals'
-});
-
-Proposal.belongsTo(RFP, {
-  foreignKey: 'rfpId',
-  as: 'rfp'
-});
-
-Vendor.hasMany(Proposal, {
-  foreignKey: 'vendorId',
-  as: 'proposals'
-});
-
-Proposal.belongsTo(Vendor, {
-  foreignKey: 'vendorId',
-  as: 'vendor'
-});
-
-RFPVendor.belongsTo(RFP, {
-  foreignKey: 'rfpId'
-});
-
-RFPVendor.belongsTo(Vendor, {
-  foreignKey: 'vendorId'
-});
+Vendor.hasMany(Proposal, { foreignKey: 'vendorId', as: 'proposals' });
+Proposal.belongsTo(Vendor, { foreignKey: 'vendorId', as: 'vendor' });
 
 module.exports = {
-  sequelize,
   RFP,
   Vendor,
   Proposal,
-  RFPVendor
+  User
 };

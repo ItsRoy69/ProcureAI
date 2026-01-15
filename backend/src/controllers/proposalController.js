@@ -103,18 +103,58 @@ async function compareProposalsHandler(req, res) {
       });
     }
 
-    // Compare proposals using AI
-    const comparisonResult = await compareProposals(rfp, proposals);
+    const allProposalsHaveScores = proposals.every(p => p.aiScore !== null && p.aiAnalysis !== null);
+    
+    if (allProposalsHaveScores) {
+      console.log('Using cached comparison results');
+      
+      const cachedComparison = proposals.map(p => {
+        const analysis = p.aiAnalysis ? JSON.parse(p.aiAnalysis) : {};
+        return {
+          vendorId: p.vendorId,
+          vendorName: p.vendor?.name,
+          overallScore: p.aiScore,
+          complianceScore: analysis.complianceScore || 0,
+          priceScore: analysis.priceScore || 0,
+          deliveryScore: analysis.deliveryScore || 0,
+          pros: analysis.pros || [],
+          cons: analysis.cons || [],
+          deviations: analysis.deviations || []
+        };
+      });
 
-    if (!comparisonResult.success) {
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to compare proposals',
-        details: comparisonResult.error
+      return res.json({
+        success: true,
+        data: {
+          comparison: cachedComparison,
+          summary: 'Comparison results retrieved from cache',
+          recommendation: {
+            vendorId: cachedComparison.reduce((max, item) => 
+              item.overallScore > max.overallScore ? item : max
+            ).vendorId,
+            reasoning: 'Based on previously calculated scores'
+          },
+          cached: true
+        }
       });
     }
 
-    // Update proposals with AI scores
+    const comparisonResult = await compareProposals(rfp, proposals);
+
+    if (!comparisonResult.success) {
+      const isQuotaError = comparisonResult.error && 
+        (comparisonResult.error.includes('quota') || comparisonResult.error.includes('429'));
+      
+      return res.status(isQuotaError ? 429 : 500).json({
+        success: false,
+        error: isQuotaError 
+          ? 'AI quota exceeded. Daily limit reached (20 requests/day). Please try again tomorrow or view cached results if available.'
+          : 'Failed to compare proposals',
+        details: comparisonResult.error,
+        quotaExceeded: isQuotaError
+      });
+    }
+
     const comparison = comparisonResult.data.comparison;
     for (const item of comparison) {
       const proposal = proposals.find(p => p.vendorId === item.vendorId);
@@ -135,7 +175,7 @@ async function compareProposalsHandler(req, res) {
 
     res.json({
       success: true,
-      data: comparisonResult.data
+      data: { ...comparisonResult.data, cached: false }
     });
   } catch (error) {
     console.error('Error comparing proposals:', error);

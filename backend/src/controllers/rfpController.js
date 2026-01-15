@@ -1,4 +1,4 @@
-const { RFP, Vendor, Proposal, RFPVendor } = require('../models');
+const { RFP, Vendor, Proposal } = require('../models');
 const { convertNLToRFP } = require('../services/aiService');
 const { sendRFPToVendors } = require('../services/emailService');
 
@@ -62,11 +62,6 @@ async function getAllRFPs(req, res) {
       where,
       include: [
         {
-          model: Vendor,
-          as: 'vendors',
-          through: { attributes: ['sentAt', 'emailStatus'] }
-        },
-        {
           model: Proposal,
           as: 'proposals',
           include: [{ model: Vendor, as: 'vendor' }]
@@ -97,11 +92,6 @@ async function getRFPById(req, res) {
 
     const rfp = await RFP.findByPk(id, {
       include: [
-        {
-          model: Vendor,
-          as: 'vendors',
-          through: { attributes: ['sentAt', 'emailStatus'] }
-        },
         {
           model: Proposal,
           as: 'proposals',

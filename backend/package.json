@@ -13,10 +13,12 @@
   "description": "",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "imap": "^0.8.19",
+    "jsonwebtoken": "^9.0.3",
     "mailparser": "^3.9.1",
     "nodemailer": "^7.0.12",
     "pdf-parse": "^2.4.5",
